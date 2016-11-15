@@ -13,6 +13,13 @@ python3.5 -m venv env
 python -m pip install -r src/requirements.txt
 ```
 
+Now we have to install also dependencies for client. You need to have `bower` in your computer (see installation guide - https://bower.io).
+If you have it then you can just run this command in folder `src/static/`:
+
+```javascript
+bower install
+```
+
 ## How to run
 
 Go to the `src` folder and run: 

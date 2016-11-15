@@ -1,3 +1,7 @@
+# python
 env/
 __pycache__
+
+# javascript
+bower_components
 

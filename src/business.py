@@ -1,23 +1,23 @@
-import pymysql.cursors
-
-# Connect to the database
-connection = pymysql.connect(host='127.0.0.1',
-                             port=8889,
-                             user='root',
-                             password='root',
-                             db='munchen',
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
-
-try:
-    with connection.cursor() as cursor:
-        # Read a single record
-        sql = "SELECT * FROM `VIS_ACTIVE_STUDENTS`"
-        cursor.execute(sql)
-        result = cursor.fetchone()
-        print(result)
-finally:
-    connection.close()
+# import pymysql.cursors
+#
+# # Connect to the database
+# connection = pymysql.connect(host='127.0.0.1',
+#                              port=8889,
+#                              user='root',
+#                              password='root',
+#                              db='ATHENS15',
+#                              charset='utf8mb4',
+#                              cursorclass=pymysql.cursors.DictCursor)
+#
+# try:
+#     with connection.cursor() as cursor:
+#         # Read a single record
+#         sql = "SELECT * FROM `VIS_ACTIVE_STUDENTS`"
+#         cursor.execute(sql)
+#         result = cursor.fetchone()
+#         print(result)
+# finally:
+#     connection.close()
 
 
 def get_data_for_task_1(module_name: str) -> dict:

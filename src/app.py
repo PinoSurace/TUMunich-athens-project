@@ -1,12 +1,10 @@
 from business import get_data_for_task_1
 from flask import Flask, send_from_directory
 from flask.json import jsonify
-from flask_mysqldb import MySQL
 
 
 app = Flask(__name__, static_url_path="")
 app.config['DEBUG'] = True
-mysql = MySQL(app)
 
 
 @app.route('/')

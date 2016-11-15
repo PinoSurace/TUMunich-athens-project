@@ -1,0 +1,16 @@
+{
+  "name": "munchen_visualisation",
+  "main": "index.js",
+  "version": "1.0.0",
+  "authors": [
+    "Participants of Athens 2016"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
