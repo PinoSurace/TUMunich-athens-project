@@ -17,7 +17,7 @@ var api = {
         });
     },
     
-    loadCurrciulum: function() {
+    loadCurriculum: function() {
         return new Promise(function (resolve, reject) {
 
             $.ajax({
