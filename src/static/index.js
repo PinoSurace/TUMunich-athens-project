@@ -17,7 +17,7 @@ $(document).ready(function () {
         })
     }
 
-    task1("math");
+    // task1("math");
     api.loadCurrciulum().then(function(data) {console.log(data)});
 
 

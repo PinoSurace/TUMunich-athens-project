@@ -1,13 +1,6 @@
-# import pymysql.cursors
+import pymysql.cursors
 #
-# # Connect to the database
-# connection = pymysql.connect(host='127.0.0.1',
-#                              port=8889,
-#                              user='root',
-#                              password='root',
-#                              db='ATHENS15',
-#                              charset='utf8mb4',
-#                              cursorclass=pymysql.cursors.DictCursor)
+
 #
 # try:
 #     with connection.cursor() as cursor:
@@ -18,9 +11,23 @@
 #         print(result)
 # finally:
 #     connection.close()
+from db import create_connection
+from utils import is_debug
 
 
 def get_data_for_task_1(module_name: str) -> dict:
+    # db = create_connection()
+    # try:
+    #     with db.cursor() as cursor:
+    #         sql = """
+    #             SELECT * FROM
+    #         """
+    #         result = cursor.execute(sql)
+    #         return result.fetch_all()
+    #
+    # finally:
+    #     db.close()
+
     return [
         {
             "moduleName": "Math",
@@ -50,25 +57,55 @@ def get_data_for_task_1(module_name: str) -> dict:
 
 
 def get_curriculum() -> dict:
-    return {
-        "bachelors": [
-            {
-                "curriculum_nr": 20,
-                "name": "Math",
-            },
-            {
-                "curriculum_nr": 21,
-                "name": "Physics",
-            }
-        ],
-        "masters": [
-            {
-                "curriculum_nr": 31,
-                "name": "Advanced Math",
-            },
-            {
-                "curriculum_nr": 32,
-                "name": "Biology",
-            }
-        ]
-    }
+
+    if is_debug() is False:
+
+        db = create_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = """
+                    SELECT DISTINCT CURRICULUM_NR, CURRICULUM_NAME
+                    FROM VIS_CURRICULUM_VERSION
+                    WHERE DEGREE_NAME={}
+                    GROUP BY CURRICULUM_NAME
+                """
+
+                bachelors_sql = sql.format("'Bachelor of Science'")
+                cursor.execute(bachelors_sql)
+                bachelors = cursor.fetchall()
+
+                masters_sql = sql.format("'Master of Science'")
+                cursor.execute(masters_sql)
+                masters = cursor.fetchall()
+
+                return {
+                    "bachelors": bachelors,
+                    "masters": masters
+                }
+
+        finally:
+            db.close()
+
+    else:
+        return {
+            "bachelors": [
+                {
+                    "curriculum_nr": 20,
+                    "name": "Math",
+                },
+                {
+                    "curriculum_nr": 21,
+                    "name": "Physics",
+                }
+            ],
+            "masters": [
+                {
+                    "curriculum_nr": 31,
+                    "name": "Advanced Math",
+                },
+                {
+                    "curriculum_nr": 32,
+                    "name": "Biology",
+                }
+            ]
+        }
