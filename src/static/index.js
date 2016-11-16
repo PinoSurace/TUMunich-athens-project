@@ -12,25 +12,13 @@ $(document).ready(function () {
     }
 
     function task1(moduleName) {
-        new Promise(function (resolve, reject) {
-
-            $.ajax({
-                "method": "GET",
-                "url": "/api/task1/" + moduleName,
-                "success": function (data) {
-                    resolve(data);
-                },
-                "error": function (error) {
-                    reject(error);
-                }
-            })
-
-        }).then(function (data) {
+        api.loadTask1(moduleName).then(function (data) {
             displayTask1(data);
         })
     }
 
     task1("math");
+    api.loadCurrciulum().then(function(data) {console.log(data)});
 
 
     var data = [

@@ -47,3 +47,28 @@ def get_data_for_task_1(module_name: str) -> dict:
             }
         }
     ]
+
+
+def get_curriculum() -> dict:
+    return {
+        "bachelors": [
+            {
+                "curriculum_nr": 20,
+                "name": "Math",
+            },
+            {
+                "curriculum_nr": 21,
+                "name": "Physics",
+            }
+        ],
+        "masters": [
+            {
+                "curriculum_nr": 31,
+                "name": "Advanced Math",
+            },
+            {
+                "curriculum_nr": 32,
+                "name": "Biology",
+            }
+        ]
+    }
