@@ -1,3 +1,9 @@
+function getValuesOfObject(obj) {
+  return Object.keys(obj).map(function (key) {
+    return obj[key];
+  });
+}
+
 $(document).ready(function () {
 
     function displayTask1(data) {
