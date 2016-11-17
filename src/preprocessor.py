@@ -163,6 +163,7 @@ def create_calc_bachelor_students(db, cursor):
     SELECT
         B.degree_name,
         B.curriculum_name,
+        B.curriculum_nr,
         A.st_person_nr
     FROM (SELECT st_person_nr, curriculum_nr
           FROM VIS_ACTIVE_STUDENTS
@@ -195,6 +196,7 @@ def create_calc_master_students(db, cursor):
     SELECT
         B.degree_name,
         B.curriculum_name,
+        B.curriculum_nr,
         A.st_person_nr
     FROM (SELECT st_person_nr, curriculum_nr
           FROM VIS_ACTIVE_STUDENTS
@@ -226,7 +228,9 @@ def create_calc_bachelors_and_master_students(db, cursor):
     CREATE TABLE VIS_CALC_BACH_MASTERS AS
     SELECT
         bs.curriculum_name AS bachelor_curriculum,
+        bs.curriculum_nr AS bachelor_curriculum_nr,
         ms.curriculum_name AS master_curriculum,
+        ms.curriculum_nr AS master_curriculum_nr,
         count(ms.st_person_nr) AS count
     FROM VIS_CALC_BACH_STUD AS bs
     LEFT JOIN VIS_CALC_MASTER_STUD AS ms
@@ -281,14 +285,14 @@ try:
         start = datetime.datetime.now()
         print(start)
 
-        create_calc_module(db=connection, cursor=cursor)
-        create_calc_semester(db=connection, cursor=cursor)
-        create_task_1(db=connection, cursor=cursor)
+        # create_calc_module(db=connection, cursor=cursor)
+        # create_calc_semester(db=connection, cursor=cursor)
+        # create_task_1(db=connection, cursor=cursor)
+        #
+        # create_task_2(db=connection, cursor=cursor)
 
-        create_task_2(db=connection, cursor=cursor)
-
-        create_calc_bachelor_students(db=connection, cursor=cursor)
-        create_calc_master_students(db=connection, cursor=cursor)
+        # create_calc_bachelor_students(db=connection, cursor=cursor)
+        # create_calc_master_students(db=connection, cursor=cursor)
         create_calc_bachelors_and_master_students(db=connection, cursor=cursor)
         create_calc_task_3(db=connection, cursor=cursor)
 

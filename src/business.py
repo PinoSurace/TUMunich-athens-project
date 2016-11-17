@@ -223,24 +223,6 @@ def get_data_for_task_2(curriculum_code: str) -> list:
             }
         ]
 
-        return [
-            {
-                "moduleName": "Math",
-                "medianSemester": 1,
-                "recommendedSemester": 1
-            },
-            {
-                "moduleName": "Advanced Math",
-                "medianSemester": 2,
-                "recommendedSemester": 3
-            },
-            {
-                "moduleName": "Biology",
-                "medianSemester": 3,
-                "recommendedSemester": 2
-            },
-        ]
-
 
 def get_data_for_task_3() -> list:
     if is_debug() is False:
@@ -248,34 +230,49 @@ def get_data_for_task_3() -> list:
         db = create_connection()
         try:
             with db.cursor() as cursor:
-                sql = """
-                    SELECT *
+                curriculum_sql = """
+                SELECT bachelor_curriculum_nr as node, bachelor_curriculum as name
+                FROM VIS_CALC_TASK_3
+                UNION
+                SELECT master_curriculum_nr as node, master_curriculum as name
+                FROM VIS_CALC_TASK_3
+                """
+                cursor.execute(curriculum_sql)
+                masters_and_bachelors = cursor.fetchall()
+
+                link_sql = """
+                    SELECT bachelor_curriculum_nr as source, master_curriculum_nr as target, count as value
                     FROM VIS_CALC_TASK_3;
                     """
 
-                cursor.execute(sql)
-                data = cursor.fetchall()
+                cursor.execute(link_sql)
+                links = cursor.fetchall()
 
-                return data
+                return {
+                    "nodes": masters_and_bachelors,
+                    "links": links
+                }
 
         finally:
             db.close()
 
     else:
-        return [
-            {
-                "moduleName": "Math",
-                "medianSemester": 1,
-                "recommendedSemester": 1
-            },
-            {
-                "moduleName": "Advanced Math",
-                "medianSemester": 2,
-                "recommendedSemester": 3
-            },
-            {
-                "moduleName": "Biology",
-                "medianSemester": 3,
-                "recommendedSemester": 2
-            },
-        ]
+        return {
+            # //Nodes are the curriculum items
+            "nodes": [
+                {"node": 0, "name": "Maths"},
+                {"node": 1, "name": "Physics"},
+                {"node": 2, "name": "Computer Science"},
+                {"node": 3, "name": "Advanced Maths"},
+                {"node": 4, "name": "Advanced Computer Science"}
+            ],
+            # //links are the number of students who went from one bachelor to a master
+            "links": [
+                {"source": 0, "target": 3, "value": 2},
+                {"source": 1, "target": 3, "value": 1},
+                {"source": 1, "target": 4, "value": 1},
+                {"source": 2, "target": 4, "value": 2}
+            ]}
+
+
+get_data_for_task_3()
