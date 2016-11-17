@@ -238,14 +238,13 @@ def get_data_for_task_3() -> list:
                 masters_and_bachelors = cursor.fetchall()
 
                 link_sql = """
-                    SELECT bachelor_curriculum_node as source, master_curriculum_node as target, `count` as `value`
+                    SELECT bachelor_curriculum_node as source, master_curriculum_node as target, 20 as `value`
                     FROM VIS_CALC_TASK_3;
                     """
 
                 cursor.execute(link_sql)
                 links = cursor.fetchall()
 
-                print('dsadasd')
                 return {
                     "nodes": masters_and_bachelors,
                     "links": links
