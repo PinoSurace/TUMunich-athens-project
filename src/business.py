@@ -139,24 +139,90 @@ def get_data_for_task_1(curriculum_code: str) -> dict:
 def get_data_for_task_2(curriculum_code: str) -> list:
     if is_debug() is False:
 
+        alphabet_splitter = [("A", "K"), ("K", "Z")]
+
         db = create_connection()
         try:
             with db.cursor() as cursor:
                 sql = """
                     SELECT NODE_TITLE as moduleName, MEDIAN_SEMESTER as medianSemester, SEMESTER_TYPE_ID as recommendedSemester
                     FROM VIS_CALC_TASK_2
-                    WHERE curriculum_code={} AND SEMESTER_TYPE_ID <= 6;
+                    WHERE curriculum_code={} AND SEMESTER_TYPE_ID <= 6 AND MEDIAN_SEMESTER <= 6;
                     """.format("'" + curriculum_code + "'")
 
                 cursor.execute(sql)
                 data = cursor.fetchall()
 
-                return data
+                semesters = []
+                data_sorted = list(sorted(data, key=lambda x: x["medianSemester"]))
+                for k1, g1 in groupby(data_sorted, lambda x: x["medianSemester"]):
+                    modules_parts = []
+                    for start_spell, end_spell in alphabet_splitter:
+                        modules = []
+                        s_e_filtered = list(filter(lambda x: start_spell <= x["moduleName"][0] <= end_spell, g1))
+                        for x in s_e_filtered:
+                            modules.append({
+                                "moduleName": x["moduleName"],
+                                "recommendedSemester": x["recommendedSemester"]
+                            })
+
+                        modules_part = {
+                            "name": "{}-{}".format(start_spell, end_spell),
+                            "children": modules
+                        }
+                        modules_parts.append(modules_part)
+
+                    semester = {
+                        "medianSemester": k1,
+                        "children": modules_parts
+                    }
+                    semesters.append(semester)
+
+                return semesters
 
         finally:
             db.close()
 
     else:
+        return [
+            {
+                "medianSemester": 1,
+                "children": [
+                    {
+                        "name": "A-K",
+                        "children": [
+                            {
+                                "moduleName": "Math",
+                                "recommendedSemester": 1
+                            },
+                            {
+                                "moduleName": "Biology",
+                                "recommendedSemester": 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "medianSemester": 2,
+                "children": [
+                    {
+                        "name": "A-K",
+                        "children": [
+                            {
+                                "moduleName": "Advanced Math",
+                                "recommendedSemester": 1
+                            },
+                            {
+                                "moduleName": "Advanced Biology",
+                                "recommendedSemester": 2
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+
         return [
             {
                 "moduleName": "Math",
