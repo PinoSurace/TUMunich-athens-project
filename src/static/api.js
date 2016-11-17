@@ -36,14 +36,17 @@ var api = {
     
     loadCurriculum: function() {
         return new Promise(function (resolve, reject) {
-
+            startAnimation();
+            sleep(1000000);
             $.ajax({
                 "method": "GET",
                 "url": "/api/curriculum",
                 "success": function (data) {
+                    stopAnimation();
                     resolve(data);
                 },
                 "error": function (error) {
+                    stopAnimation();
                     reject(error);
                 }
             })
@@ -52,10 +55,12 @@ var api = {
     },
 
     startAnimation: function() {
+        console.log("Start animation");
         document.getElementById("loading").style.visibility = "visible"; 
     },
 
     stopAnimation: function() {
+        console.log("Stop animation");
         document.getElementById("loading").style.visibility = "hidden";     
     }
 
