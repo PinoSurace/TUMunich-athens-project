@@ -1,8 +1,5 @@
 $(document).ready(function () {
 
-    // task1("17 761");
-    // api.loadTask2("17 761");
-
     function loadSelect() {
         api.loadCurriculum().then(function (data) {
 
@@ -19,7 +16,10 @@ $(document).ready(function () {
             })
 
             var task1select = $("#task-1-curriculum");
-            task1select.select2();
+            task1select.select2({
+                placeholder: "Select a curriculum",
+                allowClear: true
+            });
             task1select.on("change", function (e) {
                 var obj = task1select.select2("data");
                 console.log("change val=" + obj[0].id);  // 0 or 1 on change
@@ -73,8 +73,9 @@ $(document).ready(function () {
 
         function prepareDivsForDiagrams(modules) {
 
+            $("#task-1-table tbody").text("");
+
             modules.forEach(function (module) {
-                console.log(module)
                 var string = "<tr>" +
                     "<td>" +
                     module.moduleName +

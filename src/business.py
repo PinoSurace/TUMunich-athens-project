@@ -11,7 +11,7 @@ def get_data_for_task_1(curriculum_code: str) -> dict:
         try:
             with db.cursor() as cursor:
                 sql = """
-                    SELECT * FROM VIS_CALC_TASK_1 WHERE curriculum_code={}
+                    SELECT * FROM VIS_CALC_TASK_1 WHERE curriculum_code={} and SEMESTER_VALUE <= 6 AND NODE_TITLE!=""
                 """.format("'" + curriculum_code + "'")
                 cursor.execute(sql)
                 data = cursor.fetchall()
@@ -22,14 +22,29 @@ def get_data_for_task_1(curriculum_code: str) -> dict:
                     modules.append(list(g))
 
                 def convert_semesters(same_semesters):
-                    return {
+                    module = {
                         "moduleId": same_semesters[0]["NODE_ID"],
                         "moduleName": same_semesters[0]["NODE_TITLE"],
                         "type": ("master" if same_semesters[0]["DEGREE_NAME"] == "Master of Science" else "bachelor"),
-                        "numberPerSemester": functools.reduce(lambda s, m: {**s, **{
-                            "Semester " + str(m["SEMESTER_VALUE"]): m["SUCCESSFUL_STUDENTS"]}},
-                                                              same_semesters, {})
+                        "numberPerSemester": {
+                            "Semester 1": 0,
+                            "Semester 2": 0,
+                            "Semester 3": 0,
+                            "Semester 4": 0
+                        } if same_semesters[0]["DEGREE_NAME"] == "Master of Science" else {
+                            "Semester 1": 0,
+                            "Semester 2": 0,
+                            "Semester 3": 0,
+                            "Semester 4": 0,
+                            "Semester 5": 0,
+                            "Semester 6": 0
+                        }
                     }
+
+                    for m in same_semesters:
+                        module["numberPerSemester"][("Semester " + str(m["SEMESTER_VALUE"]))] = m["SUCCESSFUL_STUDENTS"]
+
+                    return module
 
                 return list(map(convert_semesters, modules))
 
@@ -130,7 +145,7 @@ def get_data_for_task_2(curriculum_code: str) -> list:
                 sql = """
                     SELECT NODE_TITLE as moduleName, MEDIAN_SEMESTER as medianSemester, SEMESTER_TYPE_ID as recommendedSemester
                     FROM VIS_CALC_TASK_2
-                    WHERE curriculum_code={} AND SEMESTER_TYPE_ID < 20;
+                    WHERE curriculum_code={} AND SEMESTER_TYPE_ID <= 6;
                     """.format("'" + curriculum_code + "'")
 
                 cursor.execute(sql)
