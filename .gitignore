@@ -1,6 +1,7 @@
 # python
 env/
 __pycache__
+config.cfg
 
 # javascript
 bower_components
