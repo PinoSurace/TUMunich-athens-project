@@ -238,7 +238,7 @@ def get_data_for_task_3() -> list:
                 masters_and_bachelors = cursor.fetchall()
 
                 link_sql = """
-                    SELECT bachelor_curriculum_node as source, master_curriculum_node as target, 20 as `value`
+                    SELECT bachelor_curriculum_node as source, master_curriculum_node as target, (LOG(`count`) * 7 + 10) as `value`
                     FROM VIS_CALC_TASK_3;
                     """
 
