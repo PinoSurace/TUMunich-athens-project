@@ -35,7 +35,7 @@ def task_2(curriculum_code):
 
 
 @app.route("/api/task3")
-def task_2():
+def task_3():
     data = get_data_for_task_3()
     return jsonify(result=data)
 
