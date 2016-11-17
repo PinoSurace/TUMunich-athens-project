@@ -34,6 +34,23 @@ var api = {
         });
     },
     
+    loadTask3: function () {
+        return new Promise(function (resolve, reject) {
+
+            $.ajax({
+                "method": "GET",
+                "url": "/api/task3",
+                "success": function (data) {
+                    resolve(data);
+                },
+                "error": function (error) {
+                    reject(error);
+                }
+            })
+
+        });
+    },
+    
     loadCurriculum: function() {
         return new Promise(function (resolve, reject) {
             startAnimation();

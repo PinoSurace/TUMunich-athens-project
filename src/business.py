@@ -163,7 +163,7 @@ def get_data_for_task_2(curriculum_code: str) -> list:
                         for x in s_e_filtered:
                             modules.append({
                                 "moduleName": x["moduleName"],
-                                "recommendedSemester": x["recommendedSemester"]
+                                "semester": x["recommendedSemester"]
                             })
 
                         modules_part = {
@@ -173,7 +173,7 @@ def get_data_for_task_2(curriculum_code: str) -> list:
                         modules_parts.append(modules_part)
 
                     semester = {
-                        "medianSemester": k1,
+                        "name": k1,
                         "children": modules_parts
                     }
                     semesters.append(semester)
@@ -186,36 +186,36 @@ def get_data_for_task_2(curriculum_code: str) -> list:
     else:
         return [
             {
-                "medianSemester": 1,
+                "name": 1,
                 "children": [
                     {
                         "name": "A-K",
                         "children": [
                             {
                                 "moduleName": "Math",
-                                "recommendedSemester": 1
+                                "semester": 1
                             },
                             {
                                 "moduleName": "Biology",
-                                "recommendedSemester": 2
+                                "semester": 2
                             }
                         ]
                     }
                 ]
             },
             {
-                "medianSemester": 2,
+                "name": 2,
                 "children": [
                     {
                         "name": "A-K",
                         "children": [
                             {
                                 "moduleName": "Advanced Math",
-                                "recommendedSemester": 1
+                                "semester": 1
                             },
                             {
                                 "moduleName": "Advanced Biology",
-                                "recommendedSemester": 2
+                                "semester": 2
                             }
                         ]
                     }
@@ -231,23 +231,21 @@ def get_data_for_task_3() -> list:
         try:
             with db.cursor() as cursor:
                 curriculum_sql = """
-                SELECT bachelor_curriculum_nr as node, bachelor_curriculum as name
-                FROM VIS_CALC_TASK_3
-                UNION
-                SELECT master_curriculum_nr as node, master_curriculum as name
-                FROM VIS_CALC_TASK_3
+                SELECT node, name
+                FROM VIS_CALC_CURRICULUM
                 """
                 cursor.execute(curriculum_sql)
                 masters_and_bachelors = cursor.fetchall()
 
                 link_sql = """
-                    SELECT bachelor_curriculum_nr as source, master_curriculum_nr as target, count as value
+                    SELECT bachelor_curriculum_node as source, master_curriculum_node as target, `count` as `value`
                     FROM VIS_CALC_TASK_3;
                     """
 
                 cursor.execute(link_sql)
                 links = cursor.fetchall()
 
+                print('dsadasd')
                 return {
                     "nodes": masters_and_bachelors,
                     "links": links
@@ -275,4 +273,4 @@ def get_data_for_task_3() -> list:
             ]}
 
 
-get_data_for_task_3()
+# get_data_for_task_3()

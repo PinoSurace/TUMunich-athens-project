@@ -153,6 +153,34 @@ def create_task_2(db, cursor):
     print("CALC_TASK_2: inserting ends....")
 
 
+def create_curriculum(db, cursor):
+    calc_curriculum_drop = """
+    DROP TABLE IF EXISTS VIS_CALC_CURRICULUM
+    """
+
+    calc_curriculum_create = """
+    set @row_number=-1;
+
+    CREATE TABLE VIS_CALC_CURRICULUM AS
+    SELECT *, (@row_number := @row_number +1) as node
+    FROM
+    (SELECT bachelor_curriculum_nr as curriculum_nr, bachelor_curriculum as name
+    FROM VIS_CALC_TASK_3
+    UNION
+    SELECT master_curriculum_nr as curriculum_nr, master_curriculum as name
+    FROM VIS_CALC_TASK_3
+    ORDER BY curriculum_nr) t
+    """
+
+    print("CALC_VIS_CALC_CURRICULUM: dropping starts....")
+    cursor.execute(calc_curriculum_drop)
+    print("CALC_VIS_CALC_CURRICULUM: dropping ends....")
+
+    print("CALC_VIS_CALC_CURRICULUM: creating starts....")
+    cursor.execute(calc_curriculum_create)
+    print("CALC_VIS_CALC_CURRICULUM: creating ends....")
+
+
 def create_calc_bachelor_students(db, cursor):
     calc_bachelor_students_drop = """
     DROP TABLE IF EXISTS VIS_CALC_BACH_STUD
@@ -164,7 +192,8 @@ def create_calc_bachelor_students(db, cursor):
         B.degree_name,
         B.curriculum_name,
         B.curriculum_nr,
-        A.st_person_nr
+        A.st_person_nr,
+        c.node as curriculum_node
     FROM (SELECT st_person_nr, curriculum_nr
           FROM VIS_ACTIVE_STUDENTS
           UNION ALL
@@ -174,6 +203,7 @@ def create_calc_bachelor_students(db, cursor):
                FROM VIS_CURRICULUM_VERSION
                WHERE degree_name = 'Bachelor of Science') AS B
         ON A.curriculum_nr = B.curriculum_nr
+    LEFT JOIN VIS_CALC_CURRICULUM c ON B.curriculum_nr=c.curriculum_nr
     WHERE degree_name IS NOT NULL AND curriculum_name IS NOT NULL;
     """
 
@@ -197,7 +227,8 @@ def create_calc_master_students(db, cursor):
         B.degree_name,
         B.curriculum_name,
         B.curriculum_nr,
-        A.st_person_nr
+        A.st_person_nr,
+        c.node as curriculum_node
     FROM (SELECT st_person_nr, curriculum_nr
           FROM VIS_ACTIVE_STUDENTS
           UNION ALL
@@ -207,6 +238,7 @@ def create_calc_master_students(db, cursor):
                FROM VIS_CURRICULUM_VERSION
                WHERE degree_name = 'Master of Science') AS B
         ON A.curriculum_nr = B.curriculum_nr
+    LEFT JOIN VIS_CALC_CURRICULUM c ON B.curriculum_nr=c.curriculum_nr
     WHERE degree_name IS NOT NULL AND curriculum_name IS NOT NULL;
     """
 
@@ -229,8 +261,10 @@ def create_calc_bachelors_and_master_students(db, cursor):
     SELECT
         bs.curriculum_name AS bachelor_curriculum,
         bs.curriculum_nr AS bachelor_curriculum_nr,
+        bs.curriculum_node AS bachelor_curriculum_node,
         ms.curriculum_name AS master_curriculum,
         ms.curriculum_nr AS master_curriculum_nr,
+        ms.curriculum_node AS master_curriculum_node,
         count(ms.st_person_nr) AS count
     FROM VIS_CALC_BACH_STUD AS bs
     LEFT JOIN VIS_CALC_MASTER_STUD AS ms
@@ -291,9 +325,11 @@ try:
         #
         # create_task_2(db=connection, cursor=cursor)
 
-        # create_calc_bachelor_students(db=connection, cursor=cursor)
-        # create_calc_master_students(db=connection, cursor=cursor)
+        create_curriculum(db=connection, cursor=cursor)
+        create_calc_bachelor_students(db=connection, cursor=cursor)
+        create_calc_master_students(db=connection, cursor=cursor)
         create_calc_bachelors_and_master_students(db=connection, cursor=cursor)
+
         create_calc_task_3(db=connection, cursor=cursor)
 
         end = datetime.datetime.now()
