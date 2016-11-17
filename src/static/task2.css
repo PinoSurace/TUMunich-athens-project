@@ -1,0 +1,15 @@
+.container {
+   position: fixed;
+   display: block;
+   opacity: 0.7;
+   background-color: #fff;
+   z-index: 99;
+   text-align: center;
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 100;
+}

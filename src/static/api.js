@@ -49,6 +49,14 @@ var api = {
             })
 
         });
+    },
+
+    startAnimation: function() {
+        document.getElementById("loading").style.visibility = "visible"; 
+    },
+
+    stopAnimation: function() {
+        document.getElementById("loading").style.visibility = "hidden";     
     }
 
 }
