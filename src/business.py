@@ -5,14 +5,14 @@ from db import create_connection
 from utils import is_debug
 
 
-def get_data_for_task_1(curriculum_code: str) -> dict:
+def get_data_for_task_1(curriculumCode: str) -> dict:
     if is_debug() is False:
         db = create_connection()
         try:
             with db.cursor() as cursor:
                 sql = """
-                    SELECT * FROM VIS_CALC_TASK_1 WHERE CURRICULUM_CODE={}
-                """.format("'" + curriculum_code + "'")
+                    SELECT * FROM VIS_CALC_TASK_1 WHERE curriculumCode={}
+                """.format("'" + curriculumCode + "'")
                 cursor.execute(sql)
                 data = cursor.fetchall()
 
@@ -23,8 +23,8 @@ def get_data_for_task_1(curriculum_code: str) -> dict:
 
                 def convert_semesters(same_semesters):
                     return {
-                        "module_id": same_semesters[0]["NODE_ID"],
-                        "module_name": same_semesters[0]["NODE_TITLE"],
+                        "moduleId": same_semesters[0]["NODE_ID"],
+                        "moduleName": same_semesters[0]["NODE_TITLE"],
                         "type": ("master" if same_semesters[0]["DEGREE_NAME"] == "Master of Science" else "bachelor"),
                         "numberPerSemester": functools.reduce(lambda s, m: {**s, **{
                             "Semester " + str(m["SEMESTER_VALUE"]): m["SUCCESSFUL_STUDENTS"]}},
@@ -74,10 +74,10 @@ def get_curriculum() -> dict:
         try:
             with db.cursor() as cursor:
                 sql = """
-                    SELECT DISTINCT curriculum_code, curriculum_name
+                    SELECT DISTINCT curriculum_code as curriculumCode, curriculum_name as curriculumName
                     FROM VIS_CURRICULUM_VERSION
                     WHERE DEGREE_NAME={}
-                    GROUP BY CURRICULUM_NAME
+                    GROUP BY curriculumName
                 """
 
                 bachelors_sql = sql.format("'Bachelor of Science'")
@@ -100,28 +100,28 @@ def get_curriculum() -> dict:
         return {
             "bachelors": [
                 {
-                    "curriculum_code": 20,
-                    "curriculum_name": "Math",
+                    "curriculumCode": 20,
+                    "curriculumName": "Math",
                 },
                 {
-                    "curriculum_code": 21,
-                    "curriculum_name": "Physics",
+                    "curriculumCode": 21,
+                    "curriculumName": "Physics",
                 }
             ],
             "masters": [
                 {
-                    "curriculum_code": 31,
-                    "curriculum_name": "Advanced Math",
+                    "curriculumCode": 31,
+                    "curriculumName": "Advanced Math",
                 },
                 {
-                    "curriculum_code": 32,
-                    "curriculum_name": "Biology",
+                    "curriculumCode": 32,
+                    "curriculumName": "Biology",
                 }
             ]
         }
 
 
-def get_data_for_task_2(curriculum_code: str) -> list:
+def get_data_for_task_2(curriculumCode: str) -> list:
     if is_debug() is False:
 
         db = create_connection()
@@ -130,8 +130,8 @@ def get_data_for_task_2(curriculum_code: str) -> list:
                 sql = """
                     SELECT NODE_TITLE as moduleName, MEDIAN_SEMESTER as medianSemester, SEMESTER_TYPE_ID as recommendedSemester
                     FROM VIS_CALC_TASK_2
-                    WHERE CURRICULUM_CODE={} AND SEMESTER_TYPE_ID < 20;
-                    """.format("'" + curriculum_code + "'")
+                    WHERE curriculumCode={} AND SEMESTER_TYPE_ID < 20;
+                    """.format("'" + curriculumCode + "'")
 
                 cursor.execute(sql)
                 data = cursor.fetchall()
