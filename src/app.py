@@ -1,4 +1,4 @@
-from business import get_data_for_task_1, get_curriculum
+from business import get_data_for_task_1, get_curriculum, get_data_for_task_2
 from flask import Flask, send_from_directory
 from flask.json import jsonify
 
@@ -16,15 +16,21 @@ def static_files(path):
     return send_from_directory('static', path)
 
 
+@app.route("/api/curriculum")
+def curriculum():
+    data = get_curriculum()
+    return jsonify(result=data)
+
+
 @app.route("/api/task1/<curriculum_code>")
 def task_1(curriculum_code):
     data = get_data_for_task_1(curriculum_code=curriculum_code)
     return jsonify(result=data)
 
 
-@app.route("/api/curriculum")
-def curriculum():
-    data = get_curriculum()
+@app.route("/api/task2/<curriculum_code>")
+def task_2(curriculum_code):
+    data = get_data_for_task_2(curriculum_code=curriculum_code)
     return jsonify(result=data)
 
 

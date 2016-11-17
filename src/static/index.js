@@ -7,6 +7,7 @@ function getValuesOfObject(obj) {
 $(document).ready(function () {
 
     task1("17 761");
+    api.loadTask2("17 761");
 
     function displayTask1(data) {
 

@@ -119,3 +119,43 @@ def get_curriculum() -> dict:
                 }
             ]
         }
+
+
+def get_data_for_task_2(curriculum_code: str) -> list:
+    if is_debug() is False:
+
+        db = create_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = """
+                    SELECT NODE_TITLE as moduleName, MEDIAN_SEMESTER as medianSemester, SEMESTER_TYPE_ID as recommendedSemester
+                    FROM VIS_CALC_TASK_2
+                    WHERE CURRICULUM_CODE={} AND SEMESTER_TYPE_ID < 20;
+                    """.format("'" + curriculum_code + "'")
+
+                cursor.execute(sql)
+                data = cursor.fetchall()
+
+                return data
+
+        finally:
+            db.close()
+
+    else:
+        return [
+            {
+                "moduleName": "Math",
+                "medianSemester": 1,
+                "recommendedSemester": 1
+            },
+            {
+                "moduleName": "Advanced Math",
+                "medianSemester": 2,
+                "recommendedSemester": 3
+            },
+            {
+                "moduleName": "Biology",
+                "medianSemester": 3,
+                "recommendedSemester": 2
+            },
+        ]

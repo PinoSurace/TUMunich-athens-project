@@ -1,6 +1,20 @@
 import datetime
 
+from math import ceil
+
 import pymysql.cursors
+
+
+def get_last_node_id(db, cursor):
+    sql = """
+    SELECT NODE_ID
+    FROM VIS_MODULE_NODE
+    ORDER BY NODE_ID DESC
+    LIMIT 1
+    """
+    cursor.execute(sql)
+    data = cursor.fetchone()
+    return data["NODE_ID"]
 
 
 def create_calc_module(db, cursor):
@@ -9,10 +23,10 @@ def create_calc_module(db, cursor):
         """
 
     calc_module_create = """
-        create table `VIS_CALC_MODULE` as
-        select mn.NODE_ID, mn.NODE_TITLE, cv.DEGREE_NAME, cv.CURRICULUM_NAME, cv.CURRICULUM_CODE
-        from VIS_MODULE_NODE mn
-        join VIS_CURRICULUM_VERSION cv on cv.CURRICULUM_NR=mn.CURRICULUM_NR;
+        CREATE table `VIS_CALC_MODULE` AS
+        SELECT mn.NODE_ID, mn.NODE_TITLE, cv.DEGREE_NAME, cv.CURRICULUM_NAME, cv.CURRICULUM_CODE, mn.SEMESTER_TYPE_ID
+        FROM VIS_MODULE_NODE mn
+        JOIN VIS_CURRICULUM_VERSION cv ON cv.CURRICULUM_NR=mn.CURRICULUM_NR;
     """
 
     print("CALC MODULE: dropping starts....")
@@ -79,8 +93,11 @@ def create_task_1(db, cursor):
     print("CALC TASK_1: creating ends....")
 
     print("CALC TASK_1: inserting starts....")
-    for i in range(133824):
-        print("iteration: {} \tdone: {} %".format(i, (i / 133824) * 100))
+    node_id = get_last_node_id(db=None, cursor=cursor)
+    part = 5000
+    iteration = ceil(node_id / part)
+    for i in range(iteration):
+        print("iteration: {} \tdone: {} %".format(i, (i / iteration) * 100))
         lower_bound = i * 5000
         upper_bound = (i + 1) * 5000
         sql = calc_task_1_insert.format(lower_bound=lower_bound, upper_bound=upper_bound)
@@ -88,6 +105,52 @@ def create_task_1(db, cursor):
         db.commit()
 
     print("CALC TASK_1: inserting ends....")
+
+
+def create_task_2(db, cursor):
+    calc_task_2_drop = """
+    DROP TABLE VIS_CALC_TASK_2;
+    """
+    calc_task_2_create = """
+    CREATE TABLE `VIS_CALC_TASK_2` (
+      `NODE_ID` int(11) DEFAULT NULL,
+      `NODE_TITLE` varchar(256) DEFAULT NULL,
+      `CURRICULUM_CODE` varchar(17) DEFAULT NULL,
+      `SEMESTER_TYPE_ID` int(11) DEFAULT NULL,
+      `MEDIAN_SEMESTER` int(11) DEFAULT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    """
+
+    calc_task_2_insert = """
+    INSERT INTO `VIS_CALC_TASK_2`
+    SELECT mn.NODE_ID, mn.NODE_TITLE, mn.CURRICULUM_CODE, mn.SEMESTER_TYPE_ID, nsm.MEDIAN_SEMESTER
+    FROM VIS_NODE_SEM_MEDIAN nsm
+    JOIN (SELECT NODE_ID, NODE_TITLE, CURRICULUM_CODE, SEMESTER_TYPE_ID  FROM  VIS_CALC_MODULE WHERE {lower_bound}<=NODE_ID AND NODE_ID<={upper_bound}) mn ON mn.NODE_ID = nsm.NODE_ID
+    WHERE {lower_bound}<=mn.NODE_ID AND mn.NODE_ID<={upper_bound}
+    GROUP BY mn.NODE_TITLE;
+     """
+
+    print("CALC TASK_2: dropping starts....")
+    cursor.execute(calc_task_2_drop)
+    print("CALC TASK_2: dropping ends....")
+
+    print("CALC TASK_2: creating starts....")
+    cursor.execute(calc_task_2_create)
+    print("CALC TASK_2: creating ends....")
+
+    print("CALC TASK_2: inserting starts....")
+    node_id = get_last_node_id(db=None, cursor=cursor)
+    part = 5000
+    iteration = ceil(node_id / part)
+    for i in range(iteration):
+        print("iteration: {} \tdone: {} %".format(i, (i / iteration) * 100))
+        lower_bound = i * part
+        upper_bound = (i + 1) * part
+        sql = calc_task_2_insert.format(lower_bound=lower_bound, upper_bound=upper_bound)
+        cursor.execute(sql)
+        db.commit()
+
+    print("CALC TASK_2: inserting ends....")
 
 
 # Connect to the database
@@ -104,13 +167,17 @@ try:
         start = datetime.datetime.now()
         print(start)
 
-        create_calc_module(db=connection, cursor=cursor)
-        create_calc_semester(db=connection, cursor=cursor)
-        create_task_1(db=connection, cursor=cursor)
+        # create_calc_module(db=connection, cursor=cursor)
+        # create_calc_semester(db=connection, cursor=cursor)
+        # create_task_1(db=connection, cursor=cursor)
+
+        create_task_2(db=connection, cursor=cursor)
+
+        
 
         end = datetime.datetime.now()
         print(end)
-        print("time: {}".format(end-start))
+        print("time: {}".format(end - start))
 
 except Exception as e:
     print(e)
