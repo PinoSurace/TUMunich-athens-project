@@ -1,70 +1,80 @@
-import pymysql.cursors
-#
+import functools
+from itertools import groupby
 
-#
-# try:
-#     with connection.cursor() as cursor:
-#         # Read a single record
-#         sql = "SELECT * FROM `VIS_ACTIVE_STUDENTS`"
-#         cursor.execute(sql)
-#         result = cursor.fetchone()
-#         print(result)
-# finally:
-#     connection.close()
 from db import create_connection
 from utils import is_debug
 
 
-def get_data_for_task_1(module_name: str) -> dict:
-    # db = create_connection()
-    # try:
-    #     with db.cursor() as cursor:
-    #         sql = """
-    #             SELECT * FROM
-    #         """
-    #         result = cursor.execute(sql)
-    #         return result.fetch_all()
-    #
-    # finally:
-    #     db.close()
+def get_data_for_task_1(curriculum_code: str) -> dict:
+    if is_debug() is False:
+        db = create_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = """
+                    SELECT * FROM VIS_CALC_TASK_1 WHERE CURRICULUM_CODE={}
+                """.format("'" + curriculum_code + "'")
+                cursor.execute(sql)
+                data = cursor.fetchall()
 
-    return [
-        {
-            "moduleName": "Math",
-            "type": "bachelor",
-            "numberOfStudents": 60,
-            "numberPerSemester": {
-                "semester_1": 10,
-                "semester_2": 20,
-                "semester_3": 0,
-                "semester_4": 5,
-                "semester_5": 15,
-                "semester_6": 10
+                modules = []
+                data_sorted = list(sorted(data, key=lambda x: x["NODE_TITLE"]))
+                for k, g in groupby(data_sorted, lambda x: x["NODE_TITLE"]):
+                    modules.append(list(g))
+
+                def convert_semesters(same_semesters):
+                    return {
+                        "module_id": same_semesters[0]["NODE_ID"],
+                        "module_name": same_semesters[0]["NODE_TITLE"],
+                        "type": ("master" if same_semesters[0]["DEGREE_NAME"] == "Master of Science" else "bachelor"),
+                        "numberPerSemester": functools.reduce(lambda s, m: {**s, **{
+                            "Semester " + str(m["SEMESTER_VALUE"]): m["SUCCESSFUL_STUDENTS"]}},
+                                                              same_semesters, {})
+                    }
+
+                return list(map(convert_semesters, modules))
+
+        finally:
+            db.close()
+
+    else:
+        return [
+            {
+                "moduleId": 1,
+                "moduleName": "Math",
+                "type": "bachelor",
+                "numberOfStudents": 60,
+                "numberPerSemester": {
+                    "Semester 1": 10,
+                    "Semester 2": 20,
+                    "Semester 3": 0,
+                    "Semester 4": 5,
+                    "Semester 5": 15,
+                    "Semester 6": 10
+                }
+            },
+            {
+                "moduleId": 2,
+                "moduleName": "Advanced Biology",
+                "type": "master",
+                "numberOfStudents": 25,
+                "numberPerSemester": {
+                    "Semester 1": 15,
+                    "Semester 2": 8,
+                    "Semester 3": 7,
+                    "Semester 4": 0
+                }
             }
-        },
-        {
-            "moduleName": "Advanced Biology",
-            "type": "master",
-            "numberOfStudents": 25,
-            "numberPerSemester": {
-                "semester_1": 15,
-                "semester_2": 8,
-                "semester_3": 7,
-                "semester_4": 0
-            }
-        }
-    ]
+        ]
 
 
 def get_curriculum() -> dict:
-
     if is_debug() is False:
 
         db = create_connection()
         try:
             with db.cursor() as cursor:
                 sql = """
-                    SELECT DISTINCT CURRICULUM_NR, CURRICULUM_NAME
+                    SELECT DISTINCT curriculum_code, curriculum_name
                     FROM VIS_CURRICULUM_VERSION
                     WHERE DEGREE_NAME={}
                     GROUP BY CURRICULUM_NAME
@@ -90,22 +100,22 @@ def get_curriculum() -> dict:
         return {
             "bachelors": [
                 {
-                    "curriculum_nr": 20,
-                    "name": "Math",
+                    "curriculum_code": 20,
+                    "curriculum_name": "Math",
                 },
                 {
-                    "curriculum_nr": 21,
-                    "name": "Physics",
+                    "curriculum_code": 21,
+                    "curriculum_name": "Physics",
                 }
             ],
             "masters": [
                 {
-                    "curriculum_nr": 31,
-                    "name": "Advanced Math",
+                    "curriculum_code": 31,
+                    "curriculum_name": "Advanced Math",
                 },
                 {
-                    "curriculum_nr": 32,
-                    "name": "Biology",
+                    "curriculum_code": 32,
+                    "curriculum_name": "Biology",
                 }
             ]
         }

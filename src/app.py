@@ -16,9 +16,9 @@ def static_files(path):
     return send_from_directory('static', path)
 
 
-@app.route("/api/task1/<module_name>")
-def task_1(module_name):
-    data = get_data_for_task_1(module_name=module_name)
+@app.route("/api/task1/<curriculum_code>")
+def task_1(curriculum_code):
+    data = get_data_for_task_1(curriculum_code=curriculum_code)
     return jsonify(result=data)
 
 
