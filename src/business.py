@@ -5,14 +5,14 @@ from db import create_connection
 from utils import is_debug
 
 
-def get_data_for_task_1(curriculumCode: str) -> dict:
+def get_data_for_task_1(curriculum_code: str) -> dict:
     if is_debug() is False:
         db = create_connection()
         try:
             with db.cursor() as cursor:
                 sql = """
-                    SELECT * FROM VIS_CALC_TASK_1 WHERE curriculumCode={}
-                """.format("'" + curriculumCode + "'")
+                    SELECT * FROM VIS_CALC_TASK_1 WHERE curriculum_code={}
+                """.format("'" + curriculum_code + "'")
                 cursor.execute(sql)
                 data = cursor.fetchall()
 
@@ -100,28 +100,28 @@ def get_curriculum() -> dict:
         return {
             "bachelors": [
                 {
-                    "curriculumCode": 20,
+                    "curriculum_code": 20,
                     "curriculumName": "Math",
                 },
                 {
-                    "curriculumCode": 21,
+                    "curriculum_code": 21,
                     "curriculumName": "Physics",
                 }
             ],
             "masters": [
                 {
-                    "curriculumCode": 31,
+                    "curriculum_code": 31,
                     "curriculumName": "Advanced Math",
                 },
                 {
-                    "curriculumCode": 32,
+                    "curriculum_code": 32,
                     "curriculumName": "Biology",
                 }
             ]
         }
 
 
-def get_data_for_task_2(curriculumCode: str) -> list:
+def get_data_for_task_2(curriculum_code: str) -> list:
     if is_debug() is False:
 
         db = create_connection()
@@ -130,8 +130,8 @@ def get_data_for_task_2(curriculumCode: str) -> list:
                 sql = """
                     SELECT NODE_TITLE as moduleName, MEDIAN_SEMESTER as medianSemester, SEMESTER_TYPE_ID as recommendedSemester
                     FROM VIS_CALC_TASK_2
-                    WHERE curriculumCode={} AND SEMESTER_TYPE_ID < 20;
-                    """.format("'" + curriculumCode + "'")
+                    WHERE curriculum_code={} AND SEMESTER_TYPE_ID < 20;
+                    """.format("'" + curriculum_code + "'")
 
                 cursor.execute(sql)
                 data = cursor.fetchall()
