@@ -19,7 +19,7 @@ def get_last_node_id(db, cursor):
 
 def create_calc_module(db, cursor):
     calc_module_drop = """
-        DROP TABLE `VIS_CALC_MODULE`;
+        DROP TABLE IF EXISTS `VIS_CALC_MODULE`;
         """
 
     calc_module_create = """
@@ -29,18 +29,18 @@ def create_calc_module(db, cursor):
         JOIN VIS_CURRICULUM_VERSION cv ON cv.CURRICULUM_NR=mn.CURRICULUM_NR;
     """
 
-    print("CALC MODULE: dropping starts....")
+    print("CALC_MODULE: dropping starts....")
     cursor.execute(calc_module_drop)
-    print("CALC MODULE: dropping ends....")
+    print("CALC_MODULE: dropping ends....")
 
-    print("CALC MODULE: creating starts....")
+    print("CALC_MODULE: creating starts....")
     cursor.execute(calc_module_create)
-    print("CALC MODULE: creating ends....")
+    print("CALC_MODULE: creating ends....")
 
 
 def create_calc_semester(db, cursor):
     calc_semester_drop = """
-        DROP TABLE `VIS_CALC_SEMESTER`;
+        DROP TABLE IF EXISTS `VIS_CALC_SEMESTER`;
     """
 
     calc_semester_create = """
@@ -50,18 +50,18 @@ def create_calc_semester(db, cursor):
         GROUP BY ns.NODE_ID;
     """
 
-    print("CALC SEMESTER: dropping starts....")
+    print("CALC_SEMESTER: dropping starts....")
     cursor.execute(calc_semester_drop)
-    print("CALC SEMESTER: dropping ends....")
+    print("CALC_SEMESTER: dropping ends....")
 
-    print("CALC SEMESTER: creating starts....")
+    print("CALC_SEMESTER: creating starts....")
     cursor.execute(calc_semester_create)
-    print("CALC SEMESTER: creating ends....")
+    print("CALC_SEMESTER: creating ends....")
 
 
 def create_task_1(db, cursor):
     calc_task_1_drop = """
-        DROP TABLE `VIS_CALC_TASK_1`;
+        DROP TABLE IF EXISTS `VIS_CALC_TASK_1`;
         """
 
     calc_task_1_create = """
@@ -84,15 +84,15 @@ def create_task_1(db, cursor):
         WHERE {lower_bound}<=cm.NODE_ID AND cm.NODE_ID<={upper_bound};
         """
 
-    print("CALC TASK_1: dropping starts....")
+    print("CALC_TASK_1: dropping starts....")
     cursor.execute(calc_task_1_drop)
-    print("CALC TASK_1: dropping ends....")
+    print("CALC_TASK_1: dropping ends....")
 
-    print("CALC TASK_1: creating starts....")
+    print("CALC_TASK_1: creating starts....")
     cursor.execute(calc_task_1_create)
-    print("CALC TASK_1: creating ends....")
+    print("CALC_TASK_1: creating ends....")
 
-    print("CALC TASK_1: inserting starts....")
+    print("CALC_TASK_1: inserting starts....")
     node_id = get_last_node_id(db=None, cursor=cursor)
     part = 5000
     iteration = ceil(node_id / part)
@@ -104,20 +104,20 @@ def create_task_1(db, cursor):
         cursor.execute(sql)
         db.commit()
 
-    print("CALC TASK_1: inserting ends....")
+    print("CALC_TASK_1: inserting ends....")
 
 
 def create_task_2(db, cursor):
     calc_task_2_drop = """
-    DROP TABLE VIS_CALC_TASK_2;
+    DROP TABLE IF EXISTS VIS_CALC_TASK_2;
     """
     calc_task_2_create = """
     CREATE TABLE `VIS_CALC_TASK_2` (
-      `NODE_ID` int(11) DEFAULT NULL,
-      `NODE_TITLE` varchar(256) DEFAULT NULL,
-      `CURRICULUM_CODE` varchar(17) DEFAULT NULL,
-      `SEMESTER_TYPE_ID` int(11) DEFAULT NULL,
-      `MEDIAN_SEMESTER` int(11) DEFAULT NULL
+      `NODE_ID` INT(11) DEFAULT NULL,
+      `NODE_TITLE` VARCHAR(256) DEFAULT NULL,
+      `CURRICULUM_CODE` VARCHAR(17) DEFAULT NULL,
+      `SEMESTER_TYPE_ID` INT(11) DEFAULT NULL,
+      `MEDIAN_SEMESTER` INT(11) DEFAULT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
     """
 
@@ -130,15 +130,15 @@ def create_task_2(db, cursor):
     GROUP BY mn.NODE_TITLE;
      """
 
-    print("CALC TASK_2: dropping starts....")
+    print("CALC_TASK_2: dropping starts....")
     cursor.execute(calc_task_2_drop)
-    print("CALC TASK_2: dropping ends....")
+    print("CALC_TASK_2: dropping ends....")
 
-    print("CALC TASK_2: creating starts....")
+    print("CALC_TASK_2: creating starts....")
     cursor.execute(calc_task_2_create)
-    print("CALC TASK_2: creating ends....")
+    print("CALC_TASK_2: creating ends....")
 
-    print("CALC TASK_2: inserting starts....")
+    print("CALC_TASK_2: inserting starts....")
     node_id = get_last_node_id(db=None, cursor=cursor)
     part = 5000
     iteration = ceil(node_id / part)
@@ -150,7 +150,121 @@ def create_task_2(db, cursor):
         cursor.execute(sql)
         db.commit()
 
-    print("CALC TASK_2: inserting ends....")
+    print("CALC_TASK_2: inserting ends....")
+
+
+def create_calc_bachelor_students(db, cursor):
+    calc_bachelor_students_drop = """
+    DROP TABLE IF EXISTS VIS_CALC_BACH_STUD
+    """
+
+    calc_bachelor_students_create = """
+    CREATE TABLE VIS_CALC_BACH_STUD AS
+    SELECT
+        B.degree_name,
+        B.curriculum_name,
+        A.st_person_nr
+    FROM (SELECT st_person_nr, curriculum_nr
+          FROM VIS_ACTIVE_STUDENTS
+          UNION ALL
+          SELECT st_person_nr, curriculum_nr
+          FROM VIS_FORMER_STUDENTS) AS A
+    LEFT JOIN (SELECT curriculum_nr, curriculum_name, degree_name
+               FROM VIS_CURRICULUM_VERSION
+               WHERE degree_name = 'Bachelor of Science') AS B
+        ON A.curriculum_nr = B.curriculum_nr
+    WHERE degree_name IS NOT NULL AND curriculum_name IS NOT NULL;
+    """
+
+    print("CALC_BACHELOR_STUDENTS: dropping starts....")
+    cursor.execute(calc_bachelor_students_drop)
+    print("CALC_BACHELOR_STUDENTS: dropping ends....")
+
+    print("CALC_BACHELOR_STUDENTS: creating starts....")
+    cursor.execute(calc_bachelor_students_create)
+    print("CALC_BACHELOR_STUDENTS: creating ends....")
+
+
+def create_calc_master_students(db, cursor):
+    calc_master_students_drop = """
+    DROP TABLE IF EXISTS VIS_CALC_MASTER_STUD
+    """
+
+    calc_master_students_create = """
+    CREATE TABLE VIS_CALC_MASTER_STUD AS
+    SELECT
+        B.degree_name,
+        B.curriculum_name,
+        A.st_person_nr
+    FROM (SELECT st_person_nr, curriculum_nr
+          FROM VIS_ACTIVE_STUDENTS
+          UNION ALL
+          SELECT st_person_nr, curriculum_nr
+          FROM VIS_FORMER_STUDENTS) AS A
+    LEFT JOIN (SELECT curriculum_nr, curriculum_name, degree_name
+               FROM VIS_CURRICULUM_VERSION
+               WHERE degree_name = 'Master of Science') AS B
+        ON A.curriculum_nr = B.curriculum_nr
+    WHERE degree_name IS NOT NULL AND curriculum_name IS NOT NULL;
+    """
+
+    print("CALC_MASTER_STUDENTS: dropping starts....")
+    cursor.execute(calc_master_students_drop)
+    print("CALC_MASTER_STUDENTS: dropping ends....")
+
+    print("CALC_MASTER_STUDENTS: creating starts....")
+    cursor.execute(calc_master_students_create)
+    print("CALC_MASTER_STUDENTS: creating ends....")
+
+
+def create_calc_bachelors_and_master_students(db, cursor):
+    calc_bachelor_master_students_drop = """
+    DROP TABLE IF EXISTS VIS_CALC_BACH_MASTERS
+    """
+
+    calc_bachelor_master_students_create = """
+    CREATE TABLE VIS_CALC_BACH_MASTERS AS
+    SELECT
+        bs.curriculum_name AS bachelor_curriculum,
+        ms.curriculum_name AS master_curriculum,
+        count(ms.st_person_nr) AS count
+    FROM VIS_CALC_BACH_STUD AS bs
+    LEFT JOIN VIS_CALC_MASTER_STUD AS ms
+        ON bs.st_person_nr = ms.st_person_nr
+    WHERE ms.curriculum_name IS NOT NULL
+    GROUP BY bachelor_curriculum, master_curriculum;
+    """
+
+    print("CALC_BACHELOR_MASTER_STUDENTS: dropping starts....")
+    cursor.execute(calc_bachelor_master_students_drop)
+    print("CALC_BACHELOR_MASTER_STUDENTS: dropping ends....")
+
+    print("CALC_BACHELOR_MASTER_STUDENTS: creating starts....")
+    cursor.execute(calc_bachelor_master_students_create)
+    print("CALC_BACHELOR_MASTER_STUDENTS: creating ends....")
+
+
+def create_calc_task_3(db, cursor):
+    calc_bachelor_master_students_top_3_drop = """
+        DROP TABLE IF EXISTS VIS_CALC_TASK_3
+        """
+
+    calc_bachelor_master_students_top_3_create = """
+        CREATE TABLE VIS_CALC_TASK_3 AS
+        SELECT *
+        FROM VIS_CALC_BACH_MASTERS AS bm
+        WHERE (SELECT count(*) FROM VIS_CALC_BACH_MASTERS AS f
+               WHERE f.bachelor_curriculum = bm.bachelor_curriculum AND f.count >= bm.count)
+        <= 3;
+        """
+
+    print("CALC_VIS_CALC_TASK_3: dropping starts....")
+    cursor.execute(calc_bachelor_master_students_top_3_drop)
+    print("CALC_VIS_CALC_TASK_3: dropping ends....")
+
+    print("CALC_VIS_CALC_TASK_3: creating starts....")
+    cursor.execute(calc_bachelor_master_students_top_3_create)
+    print("CALC_VIS_CALC_TASK_3: creating ends....")
 
 
 # Connect to the database
@@ -167,13 +281,16 @@ try:
         start = datetime.datetime.now()
         print(start)
 
-        # create_calc_module(db=connection, cursor=cursor)
-        # create_calc_semester(db=connection, cursor=cursor)
-        # create_task_1(db=connection, cursor=cursor)
+        create_calc_module(db=connection, cursor=cursor)
+        create_calc_semester(db=connection, cursor=cursor)
+        create_task_1(db=connection, cursor=cursor)
 
         create_task_2(db=connection, cursor=cursor)
 
-        
+        create_calc_bachelor_students(db=connection, cursor=cursor)
+        create_calc_master_students(db=connection, cursor=cursor)
+        create_calc_bachelors_and_master_students(db=connection, cursor=cursor)
+        create_calc_task_3(db=connection, cursor=cursor)
 
         end = datetime.datetime.now()
         print(end)

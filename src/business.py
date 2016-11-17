@@ -5,6 +5,60 @@ from db import create_connection
 from utils import is_debug
 
 
+def get_curriculum() -> dict:
+    if is_debug() is False:
+
+        db = create_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = """
+                    SELECT DISTINCT curriculum_code as curriculumCode, curriculum_name as curriculumName
+                    FROM VIS_CURRICULUM_VERSION
+                    WHERE DEGREE_NAME={}
+                    GROUP BY curriculumName
+                """
+
+                bachelors_sql = sql.format("'Bachelor of Science'")
+                cursor.execute(bachelors_sql)
+                bachelors = cursor.fetchall()
+
+                masters_sql = sql.format("'Master of Science'")
+                cursor.execute(masters_sql)
+                masters = cursor.fetchall()
+
+                return {
+                    "bachelors": bachelors,
+                    "masters": masters
+                }
+
+        finally:
+            db.close()
+
+    else:
+        return {
+            "bachelors": [
+                {
+                    "curriculum_code": 20,
+                    "curriculumName": "Math",
+                },
+                {
+                    "curriculum_code": 21,
+                    "curriculumName": "Physics",
+                }
+            ],
+            "masters": [
+                {
+                    "curriculum_code": 31,
+                    "curriculumName": "Advanced Math",
+                },
+                {
+                    "curriculum_code": 32,
+                    "curriculumName": "Biology",
+                }
+            ]
+        }
+
+
 def get_data_for_task_1(curriculum_code: str) -> dict:
     if is_debug() is False:
         db = create_connection()
@@ -82,60 +136,6 @@ def get_data_for_task_1(curriculum_code: str) -> dict:
         ]
 
 
-def get_curriculum() -> dict:
-    if is_debug() is False:
-
-        db = create_connection()
-        try:
-            with db.cursor() as cursor:
-                sql = """
-                    SELECT DISTINCT curriculum_code as curriculumCode, curriculum_name as curriculumName
-                    FROM VIS_CURRICULUM_VERSION
-                    WHERE DEGREE_NAME={}
-                    GROUP BY curriculumName
-                """
-
-                bachelors_sql = sql.format("'Bachelor of Science'")
-                cursor.execute(bachelors_sql)
-                bachelors = cursor.fetchall()
-
-                masters_sql = sql.format("'Master of Science'")
-                cursor.execute(masters_sql)
-                masters = cursor.fetchall()
-
-                return {
-                    "bachelors": bachelors,
-                    "masters": masters
-                }
-
-        finally:
-            db.close()
-
-    else:
-        return {
-            "bachelors": [
-                {
-                    "curriculum_code": 20,
-                    "curriculumName": "Math",
-                },
-                {
-                    "curriculum_code": 21,
-                    "curriculumName": "Physics",
-                }
-            ],
-            "masters": [
-                {
-                    "curriculum_code": 31,
-                    "curriculumName": "Advanced Math",
-                },
-                {
-                    "curriculum_code": 32,
-                    "curriculumName": "Biology",
-                }
-            ]
-        }
-
-
 def get_data_for_task_2(curriculum_code: str) -> list:
     if is_debug() is False:
 
@@ -147,6 +147,45 @@ def get_data_for_task_2(curriculum_code: str) -> list:
                     FROM VIS_CALC_TASK_2
                     WHERE curriculum_code={} AND SEMESTER_TYPE_ID <= 6;
                     """.format("'" + curriculum_code + "'")
+
+                cursor.execute(sql)
+                data = cursor.fetchall()
+
+                return data
+
+        finally:
+            db.close()
+
+    else:
+        return [
+            {
+                "moduleName": "Math",
+                "medianSemester": 1,
+                "recommendedSemester": 1
+            },
+            {
+                "moduleName": "Advanced Math",
+                "medianSemester": 2,
+                "recommendedSemester": 3
+            },
+            {
+                "moduleName": "Biology",
+                "medianSemester": 3,
+                "recommendedSemester": 2
+            },
+        ]
+
+
+def get_data_for_task_3() -> list:
+    if is_debug() is False:
+
+        db = create_connection()
+        try:
+            with db.cursor() as cursor:
+                sql = """
+                    SELECT *
+                    FROM VIS_CALC_TASK_3;
+                    """
 
                 cursor.execute(sql)
                 data = cursor.fetchall()
