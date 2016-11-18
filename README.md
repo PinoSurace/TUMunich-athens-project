@@ -2,37 +2,44 @@
 
 ## How to install
 
+### Step 1
+
 If you want to run our app please make sure that you have installed python (version 3.5) and MySQL.
 
-Go to the folder where you download our app and run these commands. It will create Python virtual environment for you.
+Go to the source folder (`src`) and run these commands. It will create Python virtual environment for you.
 It will also install python packages which are required for running our app. 
 
-```python
-python3.5 -m venv env
-. env/bin/activate
-python -m pip install -r src/requirements.txt
+```bash
+$ python3.5 -m venv env
+$ . env/bin/activate
+$ python -m pip install -r src/requirements.txt
 ```
 
-Now we have to install also dependencies for client. You need to have `bower` in your computer (see installation guide - https://bower.io).
-If you have it then you can just run this command in folder `src/static/`:
+### Step 2
+You have to create `src/config.cfg` file where you have to put mainly information about your database. You can use our example of config located in `src/config.cfg.example`.
 
-```javascript
-bower install
+### Step 3
+In order for the program to display the data rapidly, we had to preprocess the data and store it in new tables. For that you just need to go to the `src` folder and run this command:
+
+```bash
+$ python preprocessor.py
+```
+
+### Step 4
+Now we have to install libraries for `javascript` part. You need to have `bower` in your computer (see installation guide - https://bower.io).
+Once you have it you can just run this command in folder `src/static/`:
+
+```bash
+$ bower install
 ```
 
 ## How to run
 
-Go to the `src` folder. If it is your first time you have to preprocess data first. For that please run:
-
-```
-python preprocessor.py
-```
-
 Then you can just start the app: 
 
-```python
-python app.py
+```bash
+$ python app.py
 ```
 
-Now you should be able to access our visualization on address `localhost:5000`
+Now you should be able to access our visualisation on address `localhost:5000`
 
