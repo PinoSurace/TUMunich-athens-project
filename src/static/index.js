@@ -42,7 +42,7 @@ $(document).ready(function () {
                     return a + b;
                 }, 0);
             });
-            var windowWidth = window.innerWidth * 0.7;
+            var windowWidth = window.innerWidth * 0.6;
             var chart = d3.select("#d3-content-" + module.moduleId).append("svg") // creating the svg object inside the container div
                 .attr("class", "chart")
                 .attr("width", windowWidth) // bar has a fixed width
@@ -77,10 +77,10 @@ $(document).ready(function () {
 
             modules.forEach(function (module) {
                 var string = "<tr>" +
-                    "<td>" +
+                    "<td style=\"width:35%\">" +
                     module.moduleName +
                     "</td>" +
-                    "<td>" +
+                    "<td style=\"width:65%\">" +
                     "<div id=\"d3-content-" + module.moduleId + "\"></div>" +
                     "</td>" +
                     "</tr>";
