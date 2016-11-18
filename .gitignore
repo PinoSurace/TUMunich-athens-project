@@ -6,3 +6,5 @@ config.cfg
 # javascript
 bower_components
 
+# Web Storm
+.idea

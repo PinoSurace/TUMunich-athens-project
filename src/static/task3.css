@@ -1,18 +1,21 @@
 
-  #chart {
-    height: 75%;
-    font: 13px sans-serif;
-  }
-  .node rect {
-    fill-opacity: .9;
-    shape-rendering: crispEdges;
-    stroke-width: 0;
-  }
-  .node text {
-    text-shadow: 0 1px 0 #fff;
-  }
-  .link {
-    fill: none;
-    stroke: #000;
-    stroke-opacity: .2;
-  }
+.node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+  stroke-width: 0;
+}
+
+.node text {
+  text-shadow: 0 1px 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+.link:hover {
+    stroke-opacity: .35;
+}
