@@ -24,7 +24,7 @@ def create_calc_module(db, cursor):
 
     calc_module_create = """
         CREATE table `VIS_CALC_MODULE` AS
-        SELECT mn.NODE_ID, mn.NODE_TITLE, cv.DEGREE_NAME, cv.CURRICULUM_NAME, cv.CURRICULUM_CODE, mn.SEMESTER_TYPE_ID
+        SELECT mn.NODE_ID, mn.NODE_TITLE, mn.NODE_SHORTNAME, cv.DEGREE_NAME, cv.CURRICULUM_NAME, cv.CURRICULUM_CODE, mn.SEMESTER_TYPE_ID
         FROM VIS_MODULE_NODE mn
         JOIN VIS_CURRICULUM_VERSION cv ON cv.CURRICULUM_NR=mn.CURRICULUM_NR;
     """
@@ -123,11 +123,11 @@ def create_task_2(db, cursor):
 
     calc_task_2_insert = """
     INSERT INTO `VIS_CALC_TASK_2`
-    SELECT mn.NODE_ID, mn.NODE_TITLE, mn.CURRICULUM_CODE, mn.SEMESTER_TYPE_ID, nsm.MEDIAN_SEMESTER
+    SELECT mn.NODE_ID, mn.NODE_SHORTNAME, mn.CURRICULUM_CODE, mn.SEMESTER_TYPE_ID, nsm.MEDIAN_SEMESTER
     FROM VIS_NODE_SEM_MEDIAN nsm
-    JOIN (SELECT NODE_ID, NODE_TITLE, CURRICULUM_CODE, SEMESTER_TYPE_ID  FROM  VIS_CALC_MODULE WHERE {lower_bound}<=NODE_ID AND NODE_ID<={upper_bound}) mn ON mn.NODE_ID = nsm.NODE_ID
+    JOIN (SELECT NODE_ID, NODE_SHORTNAME, CURRICULUM_CODE, SEMESTER_TYPE_ID  FROM  VIS_CALC_MODULE WHERE {lower_bound}<=NODE_ID AND NODE_ID<={upper_bound}) mn ON mn.NODE_ID = nsm.NODE_ID
     WHERE {lower_bound}<=mn.NODE_ID AND mn.NODE_ID<={upper_bound}
-    GROUP BY mn.NODE_TITLE;
+    GROUP BY mn.NODE_SHORTNAME;
      """
 
     print("CALC_TASK_2: dropping starts....")
@@ -319,18 +319,18 @@ try:
         start = datetime.datetime.now()
         print(start)
 
-        # create_calc_module(db=connection, cursor=cursor)
+        create_calc_module(db=connection, cursor=cursor)
         # create_calc_semester(db=connection, cursor=cursor)
         # create_task_1(db=connection, cursor=cursor)
         #
-        # create_task_2(db=connection, cursor=cursor)
+        create_task_2(db=connection, cursor=cursor)
 
-        create_curriculum(db=connection, cursor=cursor)
-        create_calc_bachelor_students(db=connection, cursor=cursor)
-        create_calc_master_students(db=connection, cursor=cursor)
-        create_calc_bachelors_and_master_students(db=connection, cursor=cursor)
-
-        create_calc_task_3(db=connection, cursor=cursor)
+        # create_curriculum(db=connection, cursor=cursor)
+        # create_calc_bachelor_students(db=connection, cursor=cursor)
+        # create_calc_master_students(db=connection, cursor=cursor)
+        # create_calc_bachelors_and_master_students(db=connection, cursor=cursor)
+        #
+        # create_calc_task_3(db=connection, cursor=cursor)
 
         end = datetime.datetime.now()
         print(end)

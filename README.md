@@ -22,7 +22,13 @@ bower install
 
 ## How to run
 
-Go to the `src` folder and run: 
+Go to the `src` folder. If it is your first time you have to preprocess data first. For that please run:
+
+```
+python preprocessor.py
+```
+
+Then you can just start the app: 
 
 ```python
 python app.py

@@ -147,7 +147,7 @@ def get_data_for_task_2(curriculum_code: str) -> list:
                 sql = """
                     SELECT NODE_TITLE as moduleName, MEDIAN_SEMESTER as medianSemester, SEMESTER_TYPE_ID as recommendedSemester
                     FROM VIS_CALC_TASK_2
-                    WHERE curriculum_code={} AND SEMESTER_TYPE_ID <= 6 AND MEDIAN_SEMESTER <= 6;
+                    WHERE NODE_TITLE IS NOT NULL AND NODE_TITLE != "" AND curriculum_code={} AND SEMESTER_TYPE_ID <= 6 AND MEDIAN_SEMESTER <= 6;
                     """.format("'" + curriculum_code + "'")
 
                 cursor.execute(sql)
@@ -162,21 +162,23 @@ def get_data_for_task_2(curriculum_code: str) -> list:
                         s_e_filtered = list(filter(lambda x: start_spell <= x["moduleName"][0] <= end_spell, g1))
                         for x in s_e_filtered:
                             modules.append({
-                                "moduleName": x["moduleName"],
-                                "semester": x["recommendedSemester"]
+                                "name": x["moduleName"],
+                                "recommendedSemester": x["recommendedSemester"],
+                                "medianForColor": k1
                             })
+                        if len(modules) != 0:
+                            modules_part = {
+                                "name": "{}-{}".format(start_spell, end_spell),
+                                "children": modules
+                            }
+                            modules_parts.append(modules_part)
 
-                        modules_part = {
-                            "name": "{}-{}".format(start_spell, end_spell),
-                            "children": modules
+                    if len(modules_parts) > 0:
+                        semester = {
+                            "median": k1,
+                            "children": modules_parts
                         }
-                        modules_parts.append(modules_part)
-
-                    semester = {
-                        "name": k1,
-                        "children": modules_parts
-                    }
-                    semesters.append(semester)
+                        semesters.append(semester)
 
                 return semesters
 
@@ -186,36 +188,36 @@ def get_data_for_task_2(curriculum_code: str) -> list:
     else:
         return [
             {
-                "name": 1,
+                "median": 1,
                 "children": [
                     {
                         "name": "A-K",
                         "children": [
                             {
-                                "moduleName": "Math",
-                                "semester": 1
+                                "name": "Math",
+                                "recommendedSemester": 1
                             },
                             {
-                                "moduleName": "Biology",
-                                "semester": 2
+                                "name": "Biology",
+                                "recommendedSemester": 2
                             }
                         ]
                     }
                 ]
             },
             {
-                "name": 2,
+                "median": 2,
                 "children": [
                     {
                         "name": "A-K",
                         "children": [
                             {
-                                "moduleName": "Advanced Math",
-                                "semester": 1
+                                "name": "Advanced Math",
+                                "recommendedSemester": 1
                             },
                             {
-                                "moduleName": "Advanced Biology",
-                                "semester": 2
+                                "name": "Advanced Biology",
+                                "recommendedSemester": 2
                             }
                         ]
                     }

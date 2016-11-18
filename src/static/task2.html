@@ -5,6 +5,79 @@
 
     <!-- Bootstrap -->
     <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bower_components/select2/dist/css/select2.min.css" rel="stylesheet">
+    <style type="text/css">
+
+        text {
+            font-size: 11px;
+            pointer-events: none;
+        }
+
+        text.parent {
+            fill: #1f77b4;
+        }
+
+        .color-0 {
+            fill: #1ebd0b;
+            stroke: #999;
+            pointer-events: all;
+        }
+        .color-1 {
+            fill: #8ee085;
+            stroke: #999;
+            pointer-events: all;
+        }
+        .color-2 {
+            fill: #c9cc21;
+            stroke: #999;
+            pointer-events: all;
+        }
+        .color-3 {
+            fill: #cc8928;
+            stroke: #999;
+            pointer-events: all;
+        }
+        .color-4 {
+            fill: #fb7763;
+            stroke: #999;
+            pointer-events: all;
+        }
+        .color-5 {
+            fill: #d02415;
+            stroke: #999;
+            pointer-events: all;
+        }
+
+
+
+        circle {
+            fill: #fcc;
+            stroke: #999;
+            pointer-events: all;
+        }
+
+        circle.parent {
+            fill: #1f77b4;
+            fill-opacity: .1;
+            stroke: steelblue;
+        }
+
+        circle.parent:hover {
+            stroke: #ff7f0e;
+            stroke-width: .5px;
+        }
+
+        circle.child {
+            pointer-events: none;
+        }
+
+        svg {
+            position: absolute;
+            top: 110px;
+            left: 20px;
+        }
+
+    </style>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -15,9 +88,11 @@
 
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="bower_components/d3/d3.min.js"></script>
-	
-	<link rel="stylesheet" type="text/css" href="task2.css">
+    <script src="bower_components/select2/dist/js/select2.min.js"></script>
+    <script src="d3.js"></script>
+    <script src="d3.layout.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="task2.css">
     <script src="api.js"></script>
 
 </head>
@@ -47,12 +122,246 @@
     </div><!-- /.container-fluid -->
 </nav>
 
-    <div class="container">
+<div class="container">
 
-    </div>
+    <select id="task-2-curriculum" class="bigdrop" style="width: 50%" tabindex="-1">
+        <option></option>
+        <optgroup label="Bachelors" id="label-bachelors">
+        </optgroup>
+        <optgroup label="Masters" id="label-masters">
+        </optgroup>
+    </select>
+
+</div>
+
+<div id="diagram"></div>
+
 
 <script language="javascript" type="text/javascript">
-    // api.stopAnimation();
+
+    $(document).ready(function () {
+
+        function loadSelect() {
+            api.loadCurriculum().then(function (data) {
+
+                data.result["bachelors"].forEach(function (curriculum) {
+                    $("#task-2-curriculum #label-bachelors").append(
+                            "<option value=\"" + curriculum.curriculumCode + "\">" + curriculum.curriculumName + "</option>"
+                    );
+                });
+
+                data.result["masters"].forEach(function (curriculum) {
+                    $("#task-2-curriculum #label-masters").append(
+                            "<option value=\"" + curriculum.curriculumCode + "\">" + curriculum.curriculumName + "</option>"
+                    );
+                })
+
+                var task1select = $("#task-2-curriculum");
+                task1select.select2({
+                    placeholder: "Select a curriculum",
+                    allowClear: true
+                });
+                task1select.on("change", function (e) {
+                    var obj = task1select.select2("data");
+                    console.log("change val=" + obj[0].id);  // 0 or 1 on change
+                    var curriculumCode = obj[0].id
+                    $("#diagram").text("")
+                    task2(curriculumCode)
+
+                });
+
+            });
+        }
+
+        loadSelect();
+
+
+        function task2(curriculumCode) {
+
+
+            var w = 1490,
+                    h = 740,
+                    r = 690,
+                    x = d3.scale.linear().range([0, r]),
+                    y = d3.scale.linear().range([0, r]),
+                    node,
+                    root;
+
+            var pack = d3.layout.pack()
+                    .size([r, r])
+                    .value(function (d) {
+                        return 20;
+                    })
+
+            //.value(function(d) { return d.size; })
+
+            var vis = d3.select("#diagram").insert("svg:svg", "h2")
+                    .attr("width", w)
+                    .attr("height", h)
+                    .append("svg:g")
+                    .attr("transform", "translate(" + (w - r) / 2 + "," + (h - r) / 2 + ")");
+
+
+            api.loadTask2(curriculumCode).then(function (data) {
+
+
+                data = {
+                    "name": "module",
+                    "children": data.result
+                };
+
+                node = root = data;
+
+                console.log(data);
+
+                var nodes = pack.nodes(root);
+                var median = 2;
+                var i = 0;
+                var classd;
+
+                console.log(nodes)
+
+
+                var index = new Array(0, 0, 0, 0, 0, 0);
+                var j = 0;
+
+
+                for (i = 0; i < nodes.length; i++) {
+                    if (nodes[i].median) {
+                        index[j] = i;
+                        j = j + 1;
+
+                    }
+                }
+
+                j = 0;
+
+                d3.select("#diagram").selectAll("p").text(nodes[0].x);
+                vis.selectAll("circle")
+                        .data(nodes)
+                        .enter().append("svg:circle")
+                        .attr("class", function (d) {
+
+                            if (d.medianForColor != null && d.recommendedSemester != null) {
+
+                                switch (Math.abs(d.medianForColor - d.recommendedSemester)) {
+                                    case 0: return "color-0";
+                                    case 1: return "color-1";
+                                    case 2: return "color-2";
+                                    case 3: return "color-3";
+                                    case 4: return "color-4";
+                                    case 5: return "color-5";
+
+                                }
+
+                            }
+
+
+//                            if (index[j] <= i) j = j + 1;
+
+                            if (d.children) return "parent";
+//                            else if (d.recommendedSemester < j) return "good";
+//                            else return d.recommendedSemester > j ? "bad" : "fair";
+                        })
+                        .attr("cx", function (d) {
+                            return d.x;
+                        })
+                        .attr("cy", function (d) {
+                            return d.y;
+                        })
+                        .attr("r", function (d) {
+                            return d.r;
+                        })
+                        .on("click", function (d) {
+                            return zoom(node == d ? root : d);
+                        });
+
+                vis.selectAll("text")
+                        .data(nodes)
+                        .enter().append("svg:text")
+                        .attr("class", function (d) {
+                            return d.children ? "parent" : "child";
+                        })
+                        .attr("x", function (d) {
+                            return d.x;
+                        })
+                        .attr("y", function (d) {
+                            console.log(d)
+                            if (d.median) {
+                                return d.y - d.r + 20
+                            } else if (d.name == "A-K" || d.name == "K-Z") {
+                                return d.y - d.r + 40
+                            } else {
+                                return d.y;
+                            }
+                        })
+                        .attr("dy", ".35em")
+                        .attr("text-anchor", "middle")
+                        .style("opacity", function (d) {
+                            if (d.name == "module") {
+                                return 0;
+                            }
+
+                            return d.r > 50 ? 1 : 0;
+                        })
+                        .text(function (d) {
+                            var str = d.median ? d.median + ". semester" : d.name;
+                            if (d.recommendedSemester) str = str + " Rmd=" + d.recommendedSemester;
+                            return str;
+                        });
+
+                d3.select(window).on("click", function () {
+                    zoom(root);
+                });
+            })
+
+            function zoom(d, i) {
+                var k = r / d.r / 2;
+                x.domain([d.x - d.r, d.x + d.r]);
+                y.domain([d.y - d.r, d.y + d.r]);
+
+                var t = vis.transition()
+                        .duration(d3.event.altKey ? 7500 : 750);
+
+                t.selectAll("circle")
+                        .attr("cx", function (d) {
+                            return x(d.x);
+                        })
+                        .attr("cy", function (d) {
+                            return y(d.y);
+                        })
+                        .attr("r", function (d) {
+                            return k * d.r;
+                        });
+
+                t.selectAll("text")
+                        .attr("x", function (d) {
+                            return x(d.x);
+                        })
+                        .attr("y", function (d) {
+                            if (d.median) {
+                                return y(d.y - d.r + 20)
+                            } else if (d.name == "A-K" || d.name == "K-Z") {
+                                return y(d.y - d.r + 40)
+                            } else {
+                                return y(d.y);
+                            }
+                        })
+                        .style("opacity", function (d) {
+                            if (d.name == "module") {
+                                return 0;
+                            }
+                            return k * d.r > 50 ? 1 : 0;
+                        });
+
+                node = d;
+                d3.event.stopPropagation();
+            }
+
+        }
+
+    })
+
 </script>
 
 </body>
